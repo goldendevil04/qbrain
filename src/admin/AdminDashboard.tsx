@@ -9,14 +9,21 @@ import {
   Calendar,
   MessageSquare,
   LogOut,
-  BarChart3
+  BarChart3,
+  FileText,
+  Palette,
+  Award
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import TeamMemberManager from './components/TeamMemberManager';
 import HackathonManager from './components/HackathonManager';
 import ApplicationManager from './components/ApplicationManager';
 import ContactManager from './components/ContactManager';
+import BlogManager from './components/BlogManager';
+import ThemeCustomizer from './components/ThemeCustomizer';
+import AchievementManager from './components/AchievementManager';
 import { getApplications, getContactMessages, getTeamMembers, getHackathons } from '../services/firebaseService';
+import { getBlogPosts } from '../services/blogService';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -24,7 +31,8 @@ const AdminDashboard = () => {
     teamMembers: 0,
     hackathons: 0,
     applications: 0,
-    messages: 0
+    messages: 0,
+    blogPosts: 0
   });
 
   useEffect(() => {
@@ -33,18 +41,20 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const [membersResult, hackathonsResult, applicationsResult, messagesResult] = await Promise.all([
+      const [membersResult, hackathonsResult, applicationsResult, messagesResult, blogResult] = await Promise.all([
         getTeamMembers(),
         getHackathons(),
         getApplications(),
-        getContactMessages()
+        getContactMessages(),
+        getBlogPosts()
       ]);
 
       setStats({
         teamMembers: membersResult.success ? membersResult.data.length : 0,
         hackathons: hackathonsResult.success ? hackathonsResult.data.length : 0,
         applications: applicationsResult.success ? applicationsResult.data.length : 0,
-        messages: messagesResult.success ? messagesResult.data.length : 0
+        messages: messagesResult.success ? messagesResult.data.length : 0,
+        blogPosts: blogResult.success ? blogResult.data.length : 0
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -63,9 +73,11 @@ const AdminDashboard = () => {
   const tabs = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
     { id: 'team', label: 'Team Members', icon: Users },
-    { id: 'hackathons', label: 'Hackathons', icon: Trophy },
+    { id: 'achievements', label: 'Achievements', icon: Award },
     { id: 'applications', label: 'Applications', icon: UserPlus },
-    { id: 'messages', label: 'Messages', icon: MessageSquare }
+    { id: 'messages', label: 'Messages', icon: MessageSquare },
+    { id: 'blog', label: 'Blog', icon: FileText },
+    { id: 'theme', label: 'Theme', icon: Palette }
   ];
 
   const renderContent = () => {
@@ -86,12 +98,12 @@ const AdminDashboard = () => {
                 </div>
               </div>
               
-              <div className="bg-slate-800/50 border border-green-400/20 rounded-xl p-6">
+              <div className="bg-slate-800/50 border border-yellow-400/20 rounded-xl p-6">
                 <div className="flex items-center space-x-3">
-                  <Trophy className="h-8 w-8 text-green-400" />
+                  <Award className="h-8 w-8 text-yellow-400" />
                   <div>
                     <div className="text-2xl font-bold text-white">{stats.hackathons}</div>
-                    <div className="text-sm text-gray-400">Hackathons</div>
+                    <div className="text-sm text-gray-400">Achievements</div>
                   </div>
                 </div>
               </div>
@@ -106,12 +118,22 @@ const AdminDashboard = () => {
                 </div>
               </div>
               
-              <div className="bg-slate-800/50 border border-yellow-400/20 rounded-xl p-6">
+              <div className="bg-slate-800/50 border border-green-400/20 rounded-xl p-6">
                 <div className="flex items-center space-x-3">
-                  <MessageSquare className="h-8 w-8 text-yellow-400" />
+                  <MessageSquare className="h-8 w-8 text-green-400" />
                   <div>
                     <div className="text-2xl font-bold text-white">{stats.messages}</div>
                     <div className="text-sm text-gray-400">Messages</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-slate-800/50 border border-blue-400/20 rounded-xl p-6">
+                <div className="flex items-center space-x-3">
+                  <FileText className="h-8 w-8 text-blue-400" />
+                  <div>
+                    <div className="text-2xl font-bold text-white">{stats.blogPosts}</div>
+                    <div className="text-sm text-gray-400">Blog Posts</div>
                   </div>
                 </div>
               </div>
@@ -120,29 +142,33 @@ const AdminDashboard = () => {
         );
       case 'team':
         return <TeamMemberManager onUpdate={fetchStats} />;
-      case 'hackathons':
-        return <HackathonManager onUpdate={fetchStats} />;
+      case 'achievements':
+        return <AchievementManager onUpdate={fetchStats} />;
       case 'applications':
         return <ApplicationManager />;
       case 'messages':
         return <ContactManager />;
+      case 'blog':
+        return <BlogManager />;
+      case 'theme':
+        return <ThemeCustomizer />;
       default:
         return null;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-black">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-black overflow-x-hidden">
       <div className="flex">
         {/* Sidebar */}
-        <div className="w-64 bg-slate-800/50 border-r border-slate-700/50 min-h-screen">
+        <div className="w-64 bg-slate-800/50 border-r border-slate-700/50 min-h-screen fixed lg:relative z-30">
           <div className="p-6">
             <h1 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">
               Qbrain Admin
             </h1>
           </div>
           
-          <nav className="px-4 space-y-2">
+          <nav className="px-4 space-y-2 pb-20">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
@@ -174,7 +200,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 p-8">
+        <div className="flex-1 lg:ml-0 ml-64 p-4 lg:p-8">
           {renderContent()}
         </div>
       </div>

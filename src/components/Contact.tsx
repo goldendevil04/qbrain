@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
-import { sendContactEmail, saveContactMessage } from '../config/emailjs';
+import { sendContactEmail } from '../config/nodemailer';
 import { saveContactMessage as saveToFirebase } from '../services/firebaseService';
 import { 
   MessageSquare, 

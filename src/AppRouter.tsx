@@ -3,11 +3,16 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import App from './App';
 import AdminPanel from './admin/AdminPanel';
-import { initEmailJS } from './config/emailjs';
+import { getThemeConfig, applyThemeToDOM } from './services/themeService';
 
 const AppRouter = () => {
   useEffect(() => {
-    initEmailJS();
+    // Load and apply theme on app start
+    const loadTheme = async () => {
+      const theme = await getThemeConfig();
+      applyThemeToDOM(theme);
+    };
+    loadTheme();
   }, []);
 
   return (

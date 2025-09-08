@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
-import { sendApplicationEmail } from '../config/emailjs';
+import { sendApplicationEmail } from '../config/nodemailer';
 import { saveApplication } from '../services/firebaseService';
 import { ChevronRight, ChevronLeft, Upload, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import ApplicationForm from './ApplicationForm';
@@ -55,7 +55,7 @@ const JoinTeam = () => {
       
       if (saveResult.success) {
         // Send emails
-        const emailResult = await sendApplicationEmail(applicationData);
+        const emailResult = await sendApplicationEmail(applicationData, applicationData.resumeFile);
         
         if (emailResult.success) {
           toast.success('Application submitted successfully!');
